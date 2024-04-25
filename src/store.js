@@ -1,10 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
-import CounterReducer from './slice/reviewSlice';
+import logger from 'redux-logger';
+import { rootReducer } from './slice';
 
 const store = configureStore({
-    reducer: {
-        counter: CounterReducer
-    }
+    reducer: rootReducer,
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger)
 })
 
 export default store;
