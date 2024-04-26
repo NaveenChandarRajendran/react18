@@ -1,0 +1,305 @@
+...................................................................................
+			 State Mutation
+..................................................................................
+
+How Component can change the data?
+
+-Via State
+
+How state can be changed
+
+-Via Events
+
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+
+class Review extends React.Component {
+
+    //state declaration
+    state = {
+        //application data/ui data
+        like: 10
+    }
+    //listener: arrow function
+    onLike = () => {
+        this.state.like++
+        console.log('inside listener', this.state)
+    }
+    render() {
+        console.log('inside render', this.state)
+        return <div>
+            <h1>Review Component</h1>
+            <h5>Like {this.state.like}</h5>
+            <button onClick={this.onLike}>😁</button>
+        </div>
+    }
+}
+
+
+const App = () => {
+    return <>
+        <Review></Review>
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />
+);
+
+In the above we have incremented, like inside listener, but no update in UI
+
+Why?
+  
+  UI logic is written inside render function,
+  When ever like is changed, we need to call render function, so that ui could be updated with new like data.
+
+How to call render?
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+
+class Review extends React.Component {
+
+    //state declaration
+    state = {
+        //application data/ui data
+        like: 10
+    }
+    //listener: arrow function
+    onLike = () => {
+        this.state.like++
+        console.log('inside listener', this.state)
+        //calling render
+        this.render()
+    }
+    render() {
+        console.log('inside render', this.state)
+        return <div>
+            <h1>Review Component</h1>
+            <h5>Like {this.state.like}</h5>
+            <button onClick={this.onLike}>😁</button>
+        </div>
+    }
+}
+
+
+const App = () => {
+    return <>
+        <Review></Review>
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />
+);
+
+You can notice in the above, we have called render inside listener, render is called but no UI update.
+
+Why?
+
+Can we call render method directly inside event listener...
+Yes, but no impact on ui update...
+
+   onLike = () => {
+        this.state.like++
+        console.log(this.state.like)
+        this.render()
+        console.log('onLike is clicked')
+    }
+Note: render should be not called directly in order to update user interface..
+....................................................................................
+.................................................................................
+		Before writing code, we need to learn the concept
+....................................................................................
+			Functional Programming principles
+....................................................................................
+Programming paradigms:
+ any programming language is built on the top of programming paradigms
+ Collections of set of principles and concepts.
+
+Most popular programming paradigms.
+1.Object oriented
+   C++,java,C#......
+2.Procedural oriented
+   C
+3.Functional Programming 
+   LISP,Clojure,scheme,js
+
+Some languages follow multiple paradigms (hybrid) , some follow single paradigm (solo)
+
+javascript is object based, functional style programming language.
+java is object oriented,functional style programming...
+
+What is functional programming?
+
+  It is type of programming paradigm.
+
+functional programming is the first programming paradagim introduced in 1935, as part of Mathmetics called "Lambda Calculs".
+
+The first functional programming language called "LISP" was created in 1955.
+
+React uses fp principles:
+
+1.Pure functions
+2.Immuablity
+
+Pure Functions:
+
+Pure functions are defined by two rules..
+
+Rule A:
+  if function receives input, the function returns the input without any mutation...
+
+//fp principles : rule A:
+
+
+//is this function is pure or not : pure 
+function Hello(message) {
+    return message
+}
+console.log(Hello('hello'))
+
+//is this function is pure or not: impure function
+function doubleIt(value) {
+    return value * 2
+}
+console.log(doubleIt(20))
+
+Are we applying pure function rule a in React?
+
+
+Yes,With Respect to "props" every function is pure.
+//Pure function rule A in react.
+import ReactDOM from 'react-dom/client';
+
+//Every component is  based on pure function with respect to "props"
+const Welcome = props => {
+    //props.message = 'hai' // props are read only
+     return <div>
+        <h1>{props.message}</h1>
+    </div>
+}
+
+const App = () => {
+    return <>
+        <Welcome message="hello" />
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+.....................................................................................
+.....................................................................................
+				Pure Function Rule B
+....................................................................................
+
+Rule B:
+.......
+ if function receives input, what if i want to change(mutate),We can apply rule b.
+ 
+if function receives input,and modify input , we should return new object every time, which is called immutablity. 
+
+
+//pure function Rule B
+
+
+function updateProfile(city, profile) {
+    //update profile city 
+    profile.city = city
+ 
+    return profile
+}
+
+let profile = {
+    name: 'Subramanian',
+    city: 'Coimbatore'
+}
+
+console.log('before update', profile)
+const result = updateProfile('Chennai', profile)
+console.log(profile === result ? "Same Object" : "Different Object")
+console.log('after update', result)
+
+Result:
+before update {name: 'Subramanian', city: 'Coimbatore'}
+index.js:18 Same Object
+index.js:19 after update {name: 'Subramanian', city: 'Chennai'}
+
+The above code is pure or not?
+
+The above is not pure, it is impure.
+
+ "I need to mutate state(data), but at the same time, i need purity"
+			
+	                  Apply Immutablity Principle
+
+
+What is immutability?
+
+  When ever you update the data(object), you have to create new object every time.
+
+In order to write immutable code, js supports many patterns
+
+1. Plain js pattern.
+//pure function Rule B
+
+function updateProfile(city, profile) {
+    //return new object
+    return {
+        name: profile.name,
+        city: city
+    }
+}
+
+let profile = {
+    name: 'Subramanian',
+    city: 'Coimbatore'
+}
+
+console.log('before update', profile)
+const result = updateProfile('Chennai', profile)
+console.log(profile === result ? "Same Object" : "Different Object")
+console.log('after update', result)
+
+Plain js pattern has some drawback, we have to copy all the properties manually...
+
+2.Object.assign pattern
+//pure function Rule B
+
+function updateProfile(city, profile) {
+    //Object.assign 
+    return Object.assign({}, profile, { city: city })
+}
+
+let profile = {
+    name: 'Subramanian',
+    city: 'Coimbatore'
+}
+
+console.log('before update', profile)
+const result = updateProfile('Chennai', profile)
+console.log(profile === result ? "Same Object" : "Different Object")
+console.log('after update', result)
+
+3.ES 7 Spread operator 
+//pure function Rule B
+
+function updateProfile(city, profile) {
+      return { ...profile, city }
+}
+
+let profile = {
+    name: 'Subramanian',
+    city: 'Coimbatore'
+}
+
+console.log('before update', profile)
+const result = updateProfile('Chennai', profile)
+console.log(profile === result ? "Same Object" : "Different Object")
+console.log('after update', result)
