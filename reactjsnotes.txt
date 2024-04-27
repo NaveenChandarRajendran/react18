@@ -303,3 +303,1323 @@ console.log('before update', profile)
 const result = updateProfile('Chennai', profile)
 console.log(profile === result ? "Same Object" : "Different Object")
 console.log('after update', result)
+
+.....................................................................................
+			Arrays -Pure functions (immutablity)
+.....................................................................................
+
+Array pure functions:
+
+1.map
+  map is pure function , which returns new array when you iterate.
+
+2.filter
+  filter is also function, which returns new array when you iterate.
+
+map:
+
+
+function transform(data) {
+
+    return data.map(item => item)
+}
+
+let list = ['subramanian', 'ram', 'murugan']
+
+const response = transform(list)
+
+console.log(list === response ? "Same" : "Different")
+
+filter:
+
+
+function filter(data) {
+
+    return data.filter(item => item.status === true)
+}
+
+let employees = [{
+    id: 1,
+    name: 'subramanian',
+    status: true
+},
+{
+    id: 2,
+    name: 'Ram',
+    status: false
+},
+{
+    id: 3,
+    name: 'Karthik',
+    status: true
+},
+{
+    id: 4,
+    name: 'Murugan',
+    status: false
+}
+
+]
+
+const response = filter(employees)
+
+console.log(employees === response ? "Same" : "Different")
+.....................................................................................
+
+Add Item:
+
+push
+
+
+//is it pure or not
+function add(todos, todo) {
+    return todos.push(todo)
+}
+let todos = [{
+    title: 'Learn react',
+    done: true
+}];
+
+//Testing 
+Object.freeze(todos)
+
+console.log(add(todos, { title: 'Learn Microservices', done: false }));
+
+
+Response:
+Uncaught TypeError: Cannot add property 1, object is not extensible
+
+You are trying to add  on exiting memory... which is not pure and immutable...
+
+so "array.push" is not pure function.
+
+How to add item into array with purity:
+
+Solution:
+
+1.concat
+   it is pure and immutable method..
+
+//is it pure or not
+function add(todos, todo) {
+   // return todos.push(todo)
+   return todos.concat(todo)
+}
+let todos = [{
+    title: 'Learn react',
+    done: true
+}];
+
+//Testing 
+Object.freeze(todos)
+
+console.log(add(todos, { title: 'Learn Microservices', done: false }));
+
+2.Using spread operator
+
+//is it pure or not
+function add(todos, todo) {
+    // return todos.push(todo)
+    //  return todos.concat(todo)
+    return [...todos, todo]
+}
+let todos = [{
+    title: 'Learn react',
+    done: true
+}];
+
+//Testing 
+Object.freeze(todos)
+
+console.log(add(todos, { title: 'Learn Microservices', done: false }));
+....................................................................................
+
+....................................................................................
+			 React state mutation and pure functions
+.....................................................................................
+
+this.setState()
+  pure function which returns immutable object always..
+
+syntax:
+ this.setState(function(state,props){
+     //return immutable object
+    return {} / object.assign / spread notation
+ })
+.....................................................................................
+
+State Tracking:
+
+ Previous State and Current State...
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+
+class Review extends React.Component {
+
+    //state declaration
+    state = {
+        //application data/ui data
+        like: 10
+    }
+    //listener: arrow function
+    onLike = () => {
+        //react offers the pure function through which only we have to update u
+        // this.setState(function (previousState) {
+        //     // return {
+        //     //     like: previousState.like + 1
+        //     // }
+        //     // return Object.assign({}, previousState, { like: previousState.like + 1 })
+        //     return { ...previousState, like: previousState.like + 1 }
+        // })
+        // this.setState(previousState => ({ ...previousState, like: previousState.like + 1 }))
+
+        this.setState(function (previousState) {
+            console.log('Previous State ',previousState)
+            return { ...previousState, like: previousState.like + 1 }
+        })
+    }
+    render() {
+        console.log('current state', this.state)
+        return <div>
+            <h1>Review Component</h1>
+            <h5>Like {this.state.like}</h5>
+            <button onClick={this.onLike}>😁</button>
+        </div>
+    }
+}
+
+
+const App = () => {
+    return <>
+        <Review></Review>
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />
+);
+.....................................................................................
+.....................................................................................
+			Multiple State and Inline Event Listener
+.....................................................................................
+
+Note :
+ if want to more state variables, that has to be enclosed within single object only
+
+ state = {
+  ....
+ }
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+class Review extends React.Component {
+
+    state = {
+        like: 10,
+        dislike: 10
+    }
+    onLike = () => {
+        this.setState(function (previousState) {
+            console.log('Previous State ', previousState)
+            return { ...previousState, like: previousState.like + 1 }
+        })
+    }
+    render() {
+        console.log('current state', this.state)
+        return <div>
+            <h1>Review Component</h1>
+            <h5>Like {this.state.like} Dislike {this.state.dislike}</h5>
+            <button onClick={this.onLike}>😁</button>
+            {/* Inline listener */}
+            <button onClick={() => {
+                this.setState(function (previousState) {
+                    console.log('Previous State ', previousState)
+                    return { ...previousState, dislike: previousState.dislike + 1 }
+                })
+            }}>😫</button>
+
+        </div>
+    }
+}
+
+
+const App = () => {
+    return <>
+        <Review></Review>
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />
+);
+.....................................................................................
+				Complex State :Nested State
+
+			   
+state= {
+   house:{
+     name:'RavenClaw',
+     points:10
+   }
+}
+
+I need to increase the points By two..
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css'
+
+class HouseRating extends React.Component {
+    state = {
+        house: {
+            name: 'RavenClaw',
+            points: 10
+        }
+    }
+    onIncreasePointsByTwo = () => {
+        this.setState((prveState)=>{
+            return {
+                ...prveState,  //level -0 copy
+                 house: {
+                    ...prveState.house, // level-1 copy : copy all properties within house 
+                    points: prveState.house.points+ 2
+                 }
+            }
+        })
+    }
+
+    render() {
+        return <div>
+            <h1>House Rating Component</h1>
+            <h3>House Name : {this.state.house.name}</h3>
+            <h3>Points : {this.state.house.points}</h3>
+            <button onClick={this.onIncreasePointsByTwo}>+</button>
+        </div>
+    }
+}
+
+const App = () => {
+    return <>
+        <HouseRating />
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />
+);
+.....................................................................................
+				Deep Nesting
+.....................................................................................
+
+Assigment:
+state = {
+  customer: {
+    id:1,
+    name:'Subramanian'
+    contact: {
+	address: {
+	    city:'Chennai'
+	},
+	communcation:{ 
+           mobileNo:'9000000'
+	}
+    }
+  }
+
+}
+
+How to update mobileNo - 834343434
+.....................................................................................
+		      Complxity of Immutable Objects 
+				 and 
+			    How to solve  them using 
+				immer.js
+.....................................................................................
+What is immer?
+  immer is simple js lib, which helps to write complex immutable code in "mutable way" like regular javascript way.
+
+immutable syntax to update object property:
+
+    state = {
+        house: {
+            name: 'RavenClaw',
+            points: 10
+        }
+    }
+
+
+ 	return {
+                ...prevState, //level -0 copy
+                house: {
+                    ...prevState.house, // level-1 copy
+                    points: prevState.house.points + 2
+                }
+        }
+
+js syntax:
+
+    state = {
+        house: {
+            name: 'RavenClaw',
+            points: 10
+        }
+    }
+
+update state:
+
+state.house.points +=2
+
+immer is lib which takes care of writing mutable code on behalf of us, developer writes mutable code, immer converts into immutable code.
+
+Immer core concept:
+
+immer provides a function called "produce"
+
+produce(state,(draft)=>{
+  draft.house.points +=2
+})
+
+Getting started:
+
+steps:
+1.install immer lib
+npm i immer
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { produce } from 'immer';
+
+class HouseRating extends React.Component {
+
+    state = {
+        house: {
+            name: 'RavenClaw',
+            points: 10
+        }
+    }
+
+    onIncreasePointByTwo = () => {
+        this.setState((prevState) => {
+            return produce(prevState, (draft) => {
+                draft.house.points += 2
+            })
+        })
+    }
+
+    render() {
+        return <div>
+            <h1>House Rating Component</h1>
+            <h1>House Name {this.state.house.name}</h1>
+            <h5>Points : {this.state.house.points}</h5>
+            <button onClick={this.onIncreasePointByTwo}>😁</button>
+
+
+        </div>
+    }
+}
+
+
+const App = () => {
+    return <>
+        <HouseRating />
+    </>
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />
+);
+
+
+....................................................................................
+			 Redux -State Management
+.....................................................................................
+
+What is state?
+ State is nothing data.
+
+State is managed within component.
+
+What if i want to share the state across the application,there is pattern called "Lift up the state", pass as prop.
+
+In state management , redux is going to act as state layer, react is going act as UI layer.
+
+React and Redux is based on the design pattern "Flux Pattern"
+
+
+https://facebookarchive.github.io/flux/
+
+
+Action---->dispatcher----->Store<--->[Reducer] 
+			    |
+			    |
+			 View-React
+
+
+What is Redux -  Red-reducer + ux (Flux) => Reducer + Flux
+
+What is Reducer?
+  Reducer is pure function, which accepts input, returns immutable object...
+  Reducer is having biz logic.
+  Who calls reducer, reducer is called by store..
+  UI Layer never communicates biz logic (reducer) directly.
+  UI Layer sends request(action) --via dispatcher---to the store, then store reacts   to that
+
+Core Concepts or Principles:
+............................
+
+1.State:
+   Redux maintains or stores the data in "single object"Redux is going to store all 
+component state into one single object -Application State
+
+const appState = {
+  ....   
+} called as application state.
+
+How appState is identified for each compoent?
+
+ Based on category/module.
+
+const appState = {
+  
+  order: {
+    
+  },
+  customer: {},
+  product:{}
+
+} 
+2.Store
+   Store is object where Redux application state lives.
+   Store offers api to communicate from react and redux to react
+   Store is entry and exit point of react and redux
+   Per application , there is single store, that store is having state..
+
+3.reducer
+    You know very well how to mutate and where mutate state in react
+     ->Inside setState pure function.
+    Reducer is pure function which returns immutable object.
+
+4.actions
+    An action is like request in webserver, redux actions are plain javascript object
+ eg:
+  let counterAction = {
+	type:'counter/increment'
+  }
+ action may take input also called payload
+  let counterByAmount = {
+   type:'counter/increment',
+   payload:12
+ }
+5.Dispatcher 
+  It is transporter which transport action object from react to redux
+  Dispatcher is represented by a method called "dispatch"
+  dispatch is part of "Store object"
+  store.dispatch(action)
+
+....................................................................................
+..................................................................................					Building Redux
+...................................................................................
+
+in order to start redux we have two patterns
+
+1.old redux  - redux.js -https://redux.js.org/
+2.new redux called "Redux toolkit" -https://redux-toolkit.js.org/
+
+
+We are going to use "Redux toolkit"
+
+There are two ways create app:
+
+1.create react only, and update redux
+
+Using Vite:
+npm create vite router-app  --template react
+npm install @reduxjs/toolkit  react-redux
+
+Using create-react-app
+npx create-react-app myapp
+npm install @reduxjs/toolkit  react-redux
+
+2.create react-redux app one short
+
+Using vite
+
+npx degit reduxjs/redux-templates/packages/vite-template-redux my-app
+
+Using create-react-app
+
+npx create-react-app myreduxapp --template redux
+.....................................................................................
+
+Level-0 :State inside component.
+
+import React, {useState} from 'react'
+import ReactDOM from 'react-dom/client'
+
+const Review = ()=> {
+  const [like, setLike] = useState(0)
+ 
+  return <>
+    <h1>Like {like}</h1>
+    <button onClick={() => {
+            setLike(like + 1)
+        }}>+</button>
+  </>
+}
+
+const App = () => <div>
+     <Review/>
+</div>
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)
+...................................................................................
+Level:1 : Moving State , Mutation into redux
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { configureStore } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+
+
+//reducer
+const ReviewReducer = (like = 10, action) => {
+    //biz
+    switch (action.type) {
+        case 'review/like':
+            return like + 1
+        default:
+            return like //default state/inital state
+    }
+}
+
+//create Store Object
+
+const store = configureStore({
+    reducer: {
+        review: ReviewReducer
+    }
+})
+
+///////////////////////////////////////////////////////
+const Review = () => {
+
+    //hook to get redux state
+    const like = useSelector(state => {
+        //appstate.reducerName
+        return state.review
+    })
+    const dispatch = useDispatch()
+
+    const onLike = () => {
+        //send action via dispatcher
+        dispatch({
+            type: 'review/like'
+        })
+    }
+
+    return <>
+        <h1>Like {like}</h1>
+        <button onClick={onLike}>+</button>
+    </>
+}
+
+const App = () => <div>
+    <Review />
+</div>
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+    <Provider store={store}>
+        <React.StrictMode>
+            <App />
+        </React.StrictMode>
+    </Provider>
+
+)
+configureStore() - RTK api
+
+=>to provide simplified configuration with default settings.
+
+type ConfigureEnhancersCallback = (
+  defaultEnhancers: StoreEnhancer[]
+) => StoreEnhancer[]
+
+interface ConfigureStoreOptions<
+  S = any,
+  A extends Action = AnyAction,
+  M extends Middlewares<S> = Middlewares<S>
+> {
+  /**
+   * A single reducer function that will be used as the root reducer, or an
+   * object of slice reducers that will be passed to `combineReducers()`.
+   */
+  reducer: Reducer<S, A> | ReducersMapObject<S, A>
+
+  /**
+   * An array of Redux middleware to install. If not supplied, defaults to
+   * the set of middleware returned by `getDefaultMiddleware()`.
+   */
+  middleware?: ((getDefaultMiddleware: CurriedGetDefaultMiddleware<S>) => M) | M
+
+  /**
+   * Whether to enable Redux DevTools integration. Defaults to `true`.
+   *
+   * Additional configuration can be done by passing Redux DevTools options
+   */
+  devTools?: boolean | DevToolsOptions
+
+  /**
+   * The initial state, same as Redux's createStore.
+   * You may optionally specify it to hydrate the state
+   * from the server in universal apps, or to restore a previously serialized
+   * user session. If you use `combineReducers()` to produce the root reducer
+   * function (either directly or indirectly by passing an object as `reducer`),
+   * this must be an object with the same shape as the reducer map keys.
+   */
+  preloadedState?: DeepPartial<S extends any ? S : S>
+
+  /**
+   * The store enhancers to apply. See Redux's `createStore()`.
+   * All enhancers will be included before the DevTools Extension enhancer.
+   * If you need to customize the order of enhancers, supply a callback
+   * function that will receive the original array (ie, `[applyMiddleware]`),
+   * and should return a new array (such as `[applyMiddleware, offline]`).
+   * If you only need to add middleware, you can use the `middleware` parameter instead.
+   */
+  enhancers?: StoreEnhancer[] | ConfigureEnhancersCallback
+}
+
+function configureStore<S = any, A extends Action = AnyAction>(
+  options: ConfigureStoreOptions<S, A>
+): EnhancedStore<S, A>
+.....................................................................................
+.....................................................................................
+			Multiple Reducers
+....................................................................................
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+	
+import { configureStore } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+
+//reducer
+const LikeReducer = (like = 10, action) => {
+    //biz
+    switch (action.type) {
+        case 'review/like':
+            return like + 1
+        default:
+            return like //default state/inital state
+    }
+}
+
+const DislikeReducer = (dislike = 20, action) => {
+    switch (action.type) {
+        case 'review/dislike':
+            return dislike + 1
+        default:
+            return dislike //default state/inital state
+    }
+}
+
+//create Store Object
+
+const store = configureStore({
+    reducer: {
+        like: LikeReducer,
+        dislike: DislikeReducer
+    }
+})
+
+///////////////////////////////////////////////////////
+const Review = () => {
+
+    //hook to get redux state
+    const like = useSelector(state => {
+        //appstate.reducerName
+        return state.like
+    })
+
+    const dislike = useSelector(state => {
+        //appstate.reducerName
+        return state.dislike
+    })
+    const dispatch = useDispatch()
+
+    return <>
+        <h1>Like {like} Dislike {dislike}</h1>
+        <button onClick={()=>{
+                dispatch({type:'review/like'})
+        }}>Like</button>
+                <button onClick={()=>{
+                dispatch({type:'review/dislike'})
+        }}>Dislike</button>
+    </>
+}
+
+const App = () => <div>
+    <Review />
+</div>
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+    <Provider store={store}>
+        <React.StrictMode>
+            <App />
+        </React.StrictMode>
+    </Provider>
+
+)	
+.....................................................................................
+
+1.Traditional way:
+
+//action constant
+const like = 'review/like';
+const dislike = 'review/dislike'
+
+const ReviewReducer = (state = { like: 0, dislike: 0 }, action) => {
+    //biz
+    switch (action.type) {
+        case like:
+            return produce(state, (draft) => {
+                draft.like += 1
+            })
+        case dislike:
+            return produce(state, (draft) => {
+                draft.dislike += 1
+            })
+        default:
+            return state //default state/inital state
+    }
+}
+
+2.Using createReducer api
+
+1.It is utillity function from redux-toolkit.
+2.It reduces lot of boiler plate code , provides standards based coding
+3.It is offering built in immer js api,so, no need of using "produce" directly..
+4.No need of switch..case and actions...
+
+createReducer api coding has one patterns
+
+1.builder pattern
+
+Old reducer code:
+const ReviewReducer = (state = { like: 0, dislike: 0 }, action) => {
+    //biz
+    switch (action.type) {
+        case like:
+            return produce(state, (draft) => {
+                draft.like += 1
+            })
+        case dislike:
+            return produce(state, (draft) => {
+                draft.dislike += 1
+            })
+        default:
+            return state //default state/inital state
+    }
+}
+=>It handles for a specific action types.
+=>It matching against a range of actions
+=>It handles a default case
+
+Syntax:
+
+const reducer =createReducer(initalState,(builder)=>{
+  builder.addCase(actionName,(state,action)=>{
+     //immer js code: produce function is built in
+     state.value++
+  }).
+  builder.addCase(actionName,(state,action)=>{
+     //immer js code: produce function is built in
+     state.value--
+  }).addDefaultCase((state,action)=>{})
+})
+
+
+eg:
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { configureStore, createReducer } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+
+
+//create Store Object
+const initalState = {
+    value: 10,
+    dislikevalue:10
+}
+const ReviewReducer = createReducer(initalState, builder => {
+    builder.addCase('review/like', (state, action) => {
+        //immer js code
+        state.value++
+    }).addCase('review/dislike', (state, action) => {
+        state.dislikevalue++
+    }).addDefaultCase((state, action) => { })
+})
+
+const store = configureStore({
+    reducer: {
+        review: ReviewReducer
+    }
+})
+
+///////////////////////////////////////////////////////
+const Review = () => {
+    const likeValue = useSelector(state => state.review.value)
+    const dislikeValue = useSelector(state => state.review.dislikevalue)
+    const dispatch = useDispatch()
+    const onLike = () => {
+        dispatch({
+            type: 'review/like'
+            
+        })
+    }
+
+    return <>
+        <h1>Like {likeValue} Dislike: {dislikeValue}</h1>
+        <button onClick={onLike}>+</button>
+        <button onClick={() => {
+            dispatch({ type: 'review/dislike' })
+        }}>+</button>
+    </>
+}
+
+const App = () => <div>
+    <Review />
+</div>
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+    <Provider store={store}>
+        <React.StrictMode>
+            <App />
+        </React.StrictMode>
+    </Provider>
+
+)
+.....................................................................................				Actions - createAction
+....................................................................................
+
+const like ='review/like' - Action constant
+
+Action creator:
+ It is function which returns action object
+
+function increment(payload){
+   return {
+      type:like,
+      payload:payload
+   }
+}
+
+const action = increment(2)  ==>{type:'review/like',payload:2}
+
+Without createAction function: using action constant and action creator function.
+
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { configureStore, createAction, createReducer } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+
+//action creators
+const increment = createAction('counter/increment')
+const decrement = createAction('counter/decrement')
+const incrementBy = createAction('counter/incrementBy')
+
+const initalState = {
+    value: 1
+}
+const CounterReducer = createReducer(initalState, builder => {
+    builder.addCase(increment, (state, action) => {
+        //immer js code
+        state.value++
+    }).addCase(decrement, (state, action) => {
+        state.value--
+    }).addCase(incrementBy, (state, action) => {
+        state.value += action.payload
+    }).addDefaultCase((state, action) => { })
+})
+
+const store = configureStore({
+    reducer: {
+        counter: CounterReducer
+    }
+})
+
+///////////////////////////////////////////////////////
+const Counter = () => {
+    const value = useSelector(state => state.counter.value)
+    const dispatch = useDispatch()
+    const onIncrement = () => {
+        dispatch({
+            type: increment
+
+        })
+    }
+
+    return <>
+        <h1>Counter {value}</h1>
+        <button onClick={onIncrement}>+</button>
+        <button onClick={() => {
+            dispatch({ type: decrement })
+        }}>-</button>
+
+        <button onClick={() => {
+            dispatch({ type: incrementBy, payload: 2 })
+        }}>doubleIt</button>
+    </>
+}
+
+const App = () => <div>
+    <Counter />
+</div>
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+    <Provider store={store}>
+        <React.StrictMode>
+            <App />
+        </React.StrictMode>
+    </Provider>
+
+)
+,..................................................................................
+...................................................................................
+			    createSlice
+		  (actions,reducers,we dont need to create-automation)
+.....................................................................................
+
+It uses internally createAction,createRedurcer,immer js code, every thing in one place.
+
+createSlice api is standard apporach to write redux logic.
+
+Syntax:
+
+const slice = createSlice({})
+
+parameters:
+initalState
+name
+reducers
+extraReducers
+reducerPath
+selectors
+
+Return Value:
+selectors
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { configureStore, createAction, createReducer, createSlice } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+
+//initalState
+const initialState = {
+    value: 10
+}
+const counterSlice = createSlice({
+    initialState,
+    name: 'counter',
+    reducers: {
+        //apis
+        increment(state) {
+            state.value++
+        },
+        decrement(state) {
+            state.value--
+        },
+        incrementBy(state, action) {
+            state.value += action.payload
+        }
+
+    }
+})
+
+//extract reducers,actions from the slice
+const CounterReducer = counterSlice.reducer
+const { increment, decrement, incrementBy } = counterSlice.actions
+
+const store = configureStore({
+    reducer: {
+        counter: CounterReducer
+    }
+})
+
+///////////////////////////////////////////////////////
+const Counter = () => {
+    const value = useSelector(state => state.counter.value)
+    const dispatch = useDispatch()
+    const onIncrement = () => {
+        dispatch({
+            type: increment
+
+        })
+    }
+
+    return <>
+        <h1>Counter {value}</h1>
+        <button onClick={onIncrement}>+</button>
+        <button onClick={() => {
+            dispatch({ type: decrement })
+        }}>-</button>
+
+        <button onClick={() => {
+            dispatch({ type: incrementBy, payload: 2 })
+        }}>doubleIt</button>
+    </>
+}
+
+const App = () => <div>
+    <Counter />
+</div>
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+    <Provider store={store}>
+        <React.StrictMode>
+            <App />
+        </React.StrictMode>
+    </Provider>
+
+)
+.............
+.....................................................................................
+			 Middlewares
+.....................................................................................
+
+What is middleware?
+ Middleware is collection of functions, used for some cross cutting concerns...
+
+eg:
+logging
+TimeTravel
+
+configureStore(middleware:[])
+/**
+   * An array of Redux middleware to install. If not supplied, defaults to
+   * the set of middleware returned by `getDefaultMiddleware()`.
+   */
+middleware?: ((getDefaultMiddleware: CurriedGetDefaultMiddleware<S>) => M) | M
+
+This function has already middlewars
+
+1.Immutability check middleware
+2.Serializability check middleware
+3.Action creator check middleware
+4.thunk
+
+ +
+
+Your middlewares
+
+To add Middleware
+
+Way 1:
+
+const middlewares = [thunk,immutableStateInvariant,seralizableStateInvariant]
+
+configureStore({
+ middleware: middleware
+})
+
+way 2:
+configureStore({
+ middleware: (getDefaultMiddleware)=>getDefaultMiddleware().concat(yourMiddleware)
+})
+
+
+Use case:
+Adding redux-logger:
+
+npm i --save redux-logger
+
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { configureStore, createSlice } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+import logger from 'redux-logger'
+
+//declare intial State:
+const initialState = {
+    value: 10
+}
+//create Slice
+const counterSlice = createSlice({
+    name: 'counter',
+    initialState,
+    reducers: {
+        //apis
+        increment(state) {
+            state.value++
+        },
+        decrement(state) {
+            state.value--
+        },
+        incrementByAmount(state, action) {
+            state.value += action.payload
+        }
+    }
+})
+//we have to extract reducers,actions from the slice
+
+const counterReduer = counterSlice.reducer
+const { increment, decrement, incrementByAmount } = counterSlice.actions
+
+
+const store = configureStore({
+    reducer: {
+        counter: counterReduer
+    },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger)
+})
+
+///////////////////////////////////////////////////////
+const Counter = () => {
+    //hook to get redux state
+    const value = useSelector(state => {
+        return state.counter.value
+    })
+
+    const dispatch = useDispatch()
+
+    const onIncrement = () => {
+        //send action via dispatcher
+        dispatch({
+            type: increment
+        })
+    }
+
+    return <>
+        <h1>Counter {value}</h1>
+        <button onClick={onIncrement}>+</button>
+    </>
+}
+
+const App = () => <div>
+    <Counter />
+</div>
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+    <Provider store={store}>
+        <React.StrictMode>
+            <App />
+        </React.StrictMode>
+    </Provider>
+
+)
+....................................................................................
+			API Calls and Redux ToolKit
+....................................................................................
+
+API calls can be done only with help of middleware in redux called "thunk" middleware.
+thunk is just default middlware for redux toolkit.
+
+createAsyncThunk;
+
+ A function that accepts a Redux action type string and a callback function that should return a promise.
+
+How to implement async calls using createAsyncThunk middleware.
+
+createAsyncThunk('actions',async function(){})
+
+actions = "posts/fetcPosts" ---> would be converted like below
+
+pending: 'posts/fetcPosts/pending'
+fulfilled: 'posts/fetcPosts/fulfilled'
+rejected: 'posts/fetcPosts/rejected'
+
+pending,fulfilled,rejected which are promise internal state.
+
+
+import React, { useEffect } from 'react'
+import ReactDOM from 'react-dom/client'
+import { configureStore, createAction, createAsyncThunk, createReducer, createSlice } from '@reduxjs/toolkit'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+import logger from 'redux-logger'
+import "./index.css"
+
+//api calls - createAsyncThunk
+
+//initalState
+const initialState = {
+    enities: [],
+    loading: false
+}
+//posts/getPosts/pending or /posts/getPosts/fullfiled
+
+const getPosts = createAsyncThunk('posts/getPosts', async (thunkAPI) => {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts')
+    const posts = await response.json()
+    return posts
+})
+
+const postSlice = createSlice({
+    name: 'posts',
+    initialState,
+    reducers: {},
+    extraReducers(builder) {
+        builder.addCase(getPosts.pending, (state, action) => {
+            state.loading = true
+        }).addCase(getPosts.fulfilled, (state, { payload }) => {
+            state.loading = false
+            state.enities = payload
+        }).addCase(getPosts.rejected, (state, action) => {
+            state.loading = false
+        })
+    }
+})
+const postReducer = postSlice.reducer
+
+
+const store = configureStore({
+    reducer: {
+        posts: postReducer
+    },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger)
+})
+
+const Post = () => {
+    const dispatch = useDispatch()
+    const { enities, loading } = useSelector((state) => state.posts)
+
+    useEffect(() => {
+        dispatch(getPosts())
+    }, [])
+
+    if (loading) return <p>Loading...</p>
+
+    return (
+        <div>
+            <h2>Blog Posts</h2>
+            {enities.map((post) => (
+                <p key={post.id}>{post.title}</p>
+            ))}
+        </div>
+    )
+}
+
+
+const App = () => <div>
+     <Post></Post>
+</div>
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+    <Provider store={store}>
+        <React.StrictMode>
+            <App />
+        </React.StrictMode>
+    </Provider>
+
+)
+
