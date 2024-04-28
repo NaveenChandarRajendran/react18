@@ -1,0 +1,191 @@
+What is React query?
+ A powerful library for managing data fetching and caching in React Applications.
+
+To install
+npm i @tanstack/react-query
+
+Benefits of using React Query
+    - It call a API for 3 times when the API fail. And it will fetch the API for certain interval of time to get the latest         record   and data will be cached.
+    - It helps us to maintain an Loading , data and error as straight forward, we dont need to create an seperate state for these. It completely reduce the purpose of Redux.
+
+-------------------------------------------------------------------------------------------------
+Setup in Project
+-------------------------------------------------------------------------------------------------
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
+
+<QueryClientProvider client={queryClient}>
+    <App />
+</QueryClientProvider>
+
+-------------------------------------------------------------------------------------------------
+Use in Project
+-------------------------------------------------------------------------------------------------
+import { useQuery } from '@tanstack/react-query';
+
+const { data, error, isLoading } = useQuery({
+    queryKey: ['todos'], //identifier and name of the query.
+    queryFn: () => axios.get('https://jsonplaceholder.typecode.com/todos').then(res => res.data) //querying function to execute and fetch data.
+})
+
+From useQuery we can leverage data,error and isLoading.
+
+-------------------------------------------------------------------------------------------------
+To use this in different component we can write it in Hooks generally and use to any of component.
+-------------------------------------------------------------------------------------------------
+
+const useTodos = () => {
+    return useQuery({
+        queryKey: ['todos'], //identifier and name of the query.
+        queryFn: () => axios.get('https://jsonplaceholder.typicode.com/todos').then(res => res.data) //querying function to execute and fetch data.
+    })
+}
+
+export default useTodos;
+
+-------------------------------------------------------------------------------------------------
+It provide DevTools
+-------------------------------------------------------------------------------------------------
+
+install it by
+npm i @tanstack/react-query-devtools
+
+In main index.js file import this line
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
+Below App component <App/> paste it
+<ReactQueryDevtools /> 
+
+A small icon in bottom left or right corner the button will appear for devtools.
+
+option in devtools
+observer - It shows the respected query key is used in components.
+
+-------------------------------------------------------------------------------------------------
+Configuration setting of React Query
+-------------------------------------------------------------------------------------------------
+The react query provides lot of usefull setting to be take advantages.
+We can instruct the setting by gibing defaultOptions key in initalization.
+
+const queryClient = new QueryClient({
+  defaultOptions:{
+    queries:{
+      retry:3, // no of retries to call API when it fails
+      cacheTime :300_000, // if there is no observer(query is not used by any component) the data in cache will be removed at given time.(5m),
+      staleTime :10 *1000, // It tell that how much time that the data is considered to be fresh. When it fetch the data it will replace the staleTime. At time of fetching the old data will be present untill new data arrives. So it wont interupt the UI experience.
+      refetchOnWindowFocus: false, // This makes when you are in other tab and visiting the app again it will call the query.
+      refetchOnReconnect:false, //This is used when interest goes down and comes up the query will call and get the new Data.
+      refetchOnMount:true, //This is used when every time component mounts it will call the query and fetch data.
+      keepPreviosData:true
+     }
+  }
+});
+
+By using it in QueryClient, we defining the setting to the entire project.
+But if you need to write setting to an individual query? We can achieve the setting in respected query initalization.
+example
+const useTodos = () => {
+    return useQuery({
+        queryKey: ['todos'],
+        queryFn: () => axios.get('https://jsonplaceholder.typicode.com/todos').then(res => res.data),
+        retry: 3,
+        cacheTime: 300_000,
+        staleTime: 10 * 1000,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        refetchOnMount: true
+    })
+}
+
+-------------------------------------------------------------------------------------------------
+Parameterized Query
+-------------------------------------------------------------------------------------------------
+const usePost = (userId) => {
+    return useQuery({
+        queryKey: ["users", userId, 'post'], // the key will be users/1/posts this kind of query key is more specific when we cal api with parameter.
+        queryFn: () => axios.get('https://jsonplaceholder.typicode.com/todos', {
+            params: {
+                userId
+            }
+        }).then((res) => res.data)
+    })
+}
+-------------------------------------------------------------------------------------------------
+Pagination with Query
+-------------------------------------------------------------------------------------------------
+const pageLimit = 5;
+const [page, setPage] = useState(1);
+const { data: enities, error, isLoading } = usePost({ page, pageLimit });
+
+const usePost = (query) => {
+    return useQuery({
+        queryKey: ["posts", query], //when ever the query changes , react query fetch the data from back end
+        queryFn: () => axios.get('https://jsonplaceholder.typicode.com/todos', {
+            params: {
+                _start: (query.page - 1) * query.pageLimit,
+                _limit: query.pageLimit
+            }
+        }).then((res) => res.data),
+        staleTime: 1 * 60 * 1000, //1min
+        keepPreviousData: true
+    })
+}
+
+<button disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</button>
+<button onClick={() => setPage(page + 1)}>Next</button>
+
+-------------------------------------------------------------------------------------------------
+Infinite Queries
+-------------------------------------------------------------------------------------------------
+React query provides a hook called useInfiniteQuery
+
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query"
+
+return useInfiniteQuery({
+    queryKey: ["posts", query], //when ever the query changes , react query fetch the data from back end
+    queryFn: ({ pageParam = 1 }) => axios.get('https://jsonplaceholder.typicode.com/todos', {
+        params: {
+                _start: (pageParam - 1) * query.pageLimit,
+                _limit: query.pageLimit
+            }
+        }).then((res) => res.data),
+        staleTime: 1 * 60 * 1000, //1min
+        keepPreviousData: true,
+        getNextPageParam: (lastPage, allPages) => {
+            // 1 -2
+            console.log("lastPage", lastPage);
+            console.log("allPages", allPages);
+            return lastPage.length > 0 ? allPages.length + 1 : undefined;
+        }
+})
+
+getNextPageParam is a function which will be called on button click. it has two params lastPage and allPages
+lastPage - it will has the data of the current page
+allPages - it will have all the data fetched. It will store as multi array ex : allPages = [[],[],[]]
+in getNextPageParam we should return the next page number, we need to do own logic according the backend.
+after return next page number in getNextPageParam , the queryFn function will call with parameter of next page number.
+
+Ui element
+const { data: enities, error, isLoading, fetchNextPage, isFetchingNextPage } = usePost({ pageLimit });
+
+<button disabled={isFetchingNextPage} onClick={() => fetchNextPage()}>
+    {isFetchingNextPage ? 'Loading ...' : 'Load More'}
+</button>
+
+{enities.pages.map((post) => (
+    post.map((item) => {
+        return  <p key={item.id}>{item.title}</p>
+    })
+))}
+
+from useInfiniteQuery we can extract fetchNextPage function to call.
+isFetchingNextPage is loader
+data from useInfiniteQuery will be an object as pages and pageParams
+pages will contain all the content and it will be batched according to the pageLimit. 
+ex
+pagelimit = 5
+pages :[[..5],[...5]]
+
+
