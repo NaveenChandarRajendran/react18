@@ -188,4 +188,39 @@ ex
 pagelimit = 5
 pages :[[..5],[...5]]
 
+-------------------------------------------------------------------------------------------------
+Mutation - (Best for using in post request)
+-------------------------------------------------------------------------------------------------
+useMutation hook is used to call an request with an payload once we got response frm the server we can save in the cache.
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+const queryClient = useQueryClient();
+
+const addTodo = useMutation({
+    mutationFn: (todo) => axios.post('https://jsonplaceholder.typicode.com/todos', todo)
+        .then(res => res.data),
+        onSuccess: (savedData, newTodo) => {
+            console.log("newTodo", newTodo);
+            // queryClient.invalidateQueries({
+            //     queryKey:['todos']
+            // })
+            queryClient.setQueryData(['todos'], todos => {
+                return [savedData, ...(todos || [])]
+        })
+    }
+})
+
+mutationFn - It is the function where we can call api. It receive the payload(need to send for API) as parameter.
+It as some callback methods 
+onSuccess - It will trigger when API successfully called.It recieve two parameter-
+1 - savedData - Which the response of the API
+2 - newTodo - Which we send as payload to the API.
+
+Once we got response from the server, mostly we can update the cache with 2 approach
+1 - We can invalidate the query by using the method called invalidateQueries
+This method will invalidate the query,if we invalidate the react query again fetch for the server to retrive the  latest data.
+2 - If we dont want to fetch the API,Just need to update in Cache means ,we can use setQueryData function. We need to pass queryKey
+so in params we got call data in the query as params.
+
+Both invalidateQueries and setQueryData can be leverage from useQueryClient.

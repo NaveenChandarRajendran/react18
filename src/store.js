@@ -4,7 +4,7 @@ import { rootReducer } from './slice';
 
 const store = configureStore({
     reducer: rootReducer,
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger)
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat()
 })
 
 export default store;

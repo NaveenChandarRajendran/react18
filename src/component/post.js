@@ -1,14 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getPosts } from "../slice/postSlice";
 import usePost from "../reactquery/hooks/post";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import useTodoForm from "../reactquery/hooks/todoForm";
 
 const Post = () => {
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
+    const ref = useRef();
     // const { enities, loading } = useSelector((state) => state.posts)
     // const [userId, setUserId] = useState("");
     const pageLimit = 5;
     const { data: enities, error, isLoading, fetchNextPage, isFetchingNextPage } = usePost({ pageLimit });
+
+    const addTodo = useTodoForm()
 
     useEffect(() => {
         dispatch(getPosts())
@@ -16,7 +22,6 @@ const Post = () => {
 
     if (isLoading) return <p>Loading...</p>
     if (error) return console.log(error);
-    console.log(enities)
     return (
         <div>
             <h2>Blog Posts</h2>
@@ -26,11 +31,36 @@ const Post = () => {
                 <option value={"2"}>User 2</option>
                 <option value={"3"}>User 3</option>
             </select> */}
-            {enities.pages.map((post) => (
+            {addTodo.error && (
+                <div>
+                    {addTodo.error.message}
+                </div>
+            )}
+            <form onSubmit={event => {
+                event.preventDefault();
+                if (ref.current && ref.current.value) {
+                    addTodo.mutate({
+                        id: 0,
+                        title: ref.current.value,
+                        completed: false,
+                        userId: 1
+                    })
+                }
+            }}>
+                <input ref={ref} type="text" />
+                <button>
+                    Add
+                </button>
+            </form>
+            {enities.map((item) => {
+                return <p key={item.id}>{item.title}</p>
+            })}
+            {/* //useInfiniteQuery */}
+            {/* {enities.pages.map((post) => (
                 post.map((item) => {
-                  return  <p key={item.id}>{item.title}</p>
+                    return <p key={item.id}>{item.title}</p>
                 })
-            ))}
+            ))} */}
             <button disabled={isFetchingNextPage} onClick={() => fetchNextPage()}>
                 {isFetchingNextPage ? 'Loading ...' : 'Load More'}
             </button>
