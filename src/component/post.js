@@ -5,6 +5,7 @@ import usePost from "../reactquery/hooks/post";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import useTodoForm from "../reactquery/hooks/todoForm";
+import { Link } from "react-router-dom";
 
 const Post = () => {
     const dispatch = useDispatch();
@@ -25,6 +26,8 @@ const Post = () => {
     return (
         <div>
             <h2>Blog Posts</h2>
+            <Link to="/">Counter</Link>
+
             {/* <select onChange={((event) => setUserId(event.target.value))}>
                 <option value={""}></option>
                 <option value={"1"}>User 1</option>
@@ -64,6 +67,7 @@ const Post = () => {
             <button disabled={isFetchingNextPage} onClick={() => fetchNextPage()}>
                 {isFetchingNextPage ? 'Loading ...' : 'Load More'}
             </button>
+
         </div >
     )
 }

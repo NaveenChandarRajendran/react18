@@ -2,6 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { increment, decrement, incrementBy } from '../slice/reviewSlice';
 import useTodos from '../reactquery/hooks/todos';
+import { Link } from 'react-router-dom';
 
 const Counter = () => {
     const value = useSelector(state => state.counter.value)
@@ -27,6 +28,7 @@ const Counter = () => {
         <button onClick={() => {
             dispatch({ type: incrementBy, payload: 2 })
         }}>doubleIt</button>
+        <Link to="/post">Post</Link>
     </>
 }
 

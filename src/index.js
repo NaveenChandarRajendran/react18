@@ -7,6 +7,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux'
 import store from './store';
+import { RouterProvider } from 'react-router-dom';
+import routes from './routes';
 
 const queryClient = new QueryClient({
   // defaultOptions:{
@@ -26,7 +28,7 @@ root.render(
   <Provider store={store}>
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <RouterProvider router={routes} />
         <ReactQueryDevtools />
       </QueryClientProvider>
     </React.StrictMode>

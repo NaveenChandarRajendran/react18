@@ -1,0 +1,130 @@
+...................................................................................
+			Setup React-router-dom
+..................................................................................
+npm i react-router-dom
+
+create a file called routes.js in src
+
+//routes.js
+import { createBrowserRouter } from "react-router-dom";
+import Counter from "./component/counter";
+import Post from "./component/post";
+
+const routes = createBrowserRouter([
+    { path: '/', element: <Counter /> },
+    { path: '/post', element: <Post /> }
+])
+
+export default routes;
+
+...................................................................................
+			Navigate Between pages.
+...................................................................................
+//Created new path called contact.
+const routes = createBrowserRouter([
+    { path: '/', element: <Counter /> },
+    { path: '/post', element: <Post /> },
+    { path: '/contact', element: <Contact /> }
+])
+
+//Counter.js
+import { Link } from 'react-router-dom';
+<Link to="/post">Post</Link>
+
+Link will not render whole html content to the browser. Its good for header and footers.
+
+To navigate Between the one page to other when browser event, such as click,we can use useNavigate hook.
+
+//cantact.js
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const Contact = () => {
+    const navigate = useNavigate();
+    return (
+        <div>
+            <button onClick={() => navigate('/')}>Submit</button>
+        </div>
+    )
+}
+
+export default Contact;
+
+...................................................................................
+			Passing Data with Route Paramter.
+...................................................................................
+
+To add data and route
+
+first we will add two more routes 
+
+//routes.js
+{ path: '/users', element: <UsersList /> },
+{ path: '/users/:id', element: <UserDetail /> },
+
+:id is used for dynamic data.
+we can give what ever we need ex-  path:'/users/:year/:month'
+
+created new component of UsersList and UserDetail;
+
+//usersList.js
+import React from 'react'
+import { Link } from 'react-router-dom';
+
+const UsersList = () => {
+    const users = [
+        {
+            user_id: 1,
+            name: 'Naveen'
+        },
+        {
+            user_id: 2,
+            name: 'Kamal'
+        },
+        {
+            user_id: 3,
+            name: 'Gopi'
+        }
+    ]
+    return (
+        <div>
+            <h3>UsersList</h3>
+            {users.map(user => (
+                <>
+                    <Link key={user.user_id} to={`/users/${user.user_id}`}>{user.name}</Link>
+                    <br />
+                </>
+            ))}
+        </div>
+    )
+}
+
+export default UsersList;
+
+//UserDetail.js
+
+import React from 'react'
+
+const UserDetail = () => {
+    return (
+        <div>UserDetails</div>
+    )
+}
+
+export default UserDetail;
+
+
+To extract data from the route, we can use several hooks
+const params = useParams();
+useParams will give all the params as object wise.
+ex - {
+    "id": "1",
+	"name":"Naveen",
+	...
+}
+if we have query params in route
+ex - http://localhost:3000/users/1?name=Naveen&age=25
+
+to get query params data, we can use  useSearchParams()
+const [searchParams, setSearchParams] = useSearchParams();
+
