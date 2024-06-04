@@ -10,6 +10,7 @@ import ErrorPage from "./component/errorPage";
 import PrivateRoute from "./component/privateRoute";
 import Login from "./component/login";
 import { counterContext } from './context/counterContext';
+import AccessHOC from './highOrderComponent/accessHOC';
 const Counter = React.lazy(() => import("./component/counter"));
 
 const routes = createBrowserRouter([
@@ -22,11 +23,12 @@ const routes = createBrowserRouter([
                 index: true,
                 element:
                     <React.Suspense fallback={<>...</>}>
-                        <counterContext.Provider value={{value:200,name:'naveen'}}>
+                        <counterContext.Provider value={{ value: 200, name: 'naveen' }}>
                             <Counter />
                         </counterContext.Provider>
                     </React.Suspense>
             }, //index true says that when route is at '/' Counter component has to render
+            { path: '/hoc', element: <AccessHOC /> },
             { path: '/login', element: <Login /> },
             { path: '/post', element: <Post /> },
             { path: '/contact', element: <Contact /> },
