@@ -9,8 +9,8 @@ import Layout from "./component/layout";
 import ErrorPage from "./component/errorPage";
 import PrivateRoute from "./component/privateRoute";
 import Login from "./component/login";
-
-const Counter = React.lazy(() => import("./component/counter"))
+import { counterContext } from './context/counterContext';
+const Counter = React.lazy(() => import("./component/counter"));
 
 const routes = createBrowserRouter([
     {
@@ -18,7 +18,15 @@ const routes = createBrowserRouter([
         element: <Layout />,
         errorElement: <ErrorPage />,
         children: [
-            { index: true, element: <React.Suspense fallback={<>...</>}><Counter /> </React.Suspense> }, //index true says that when route is at '/' Counter component has to render
+            {
+                index: true,
+                element:
+                    <React.Suspense fallback={<>...</>}>
+                        <counterContext.Provider value={{value:200,name:'naveen'}}>
+                            <Counter />
+                        </counterContext.Provider>
+                    </React.Suspense>
+            }, //index true says that when route is at '/' Counter component has to render
             { path: '/login', element: <Login /> },
             { path: '/post', element: <Post /> },
             { path: '/contact', element: <Contact /> },

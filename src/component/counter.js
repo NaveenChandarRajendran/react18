@@ -1,11 +1,14 @@
 import React from 'react';
+import { useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { increment, decrement, incrementBy } from '../slice/reviewSlice';
 import useTodos from '../reactquery/hooks/todos';
 import { Link } from 'react-router-dom';
+import { counterContext } from '../context/counterContext';
 
 const Counter = () => {
-    const value = useSelector(state => state.counter.value)
+    // const value = useSelector(state => state.counter.value);
+    const {value} = useContext(counterContext);
     const dispatch = useDispatch()
     const onIncrement = () => {
         dispatch({
