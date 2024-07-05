@@ -1,0 +1,140 @@
+Email - /\S+@\S+\.\S+/
+Password - /^\d{}$/
+
+[
+    {
+        question:"Question one",
+        options:["One","Two","Three"],
+        answer:["Two"]
+    },
+    {
+        question:"Question Two",
+        options :["Four","Five","Six"],
+        answer:["Five","Six"]
+    },
+    {
+
+        question:"Question Three",
+        options :["Seven","Eight","Nine"],
+        answer:["Seven","Nine"]
+    }
+]
+
+  const validate = () => {
+        const tempErrors = {};
+        if (!formData.name) tempErrors.name = "Name is required";
+        if (!formData.email) tempErrors.email = "Email is required";
+        else if (!/\S+@\S+\.\S+/.test(formData.email)) tempErrors.email = 'Please enter valid email id'
+        if (!formData.phone) tempErrors.phone = "Phone number is required";
+        else if (!/^\d{10}$/.test(formData.phone)) tempErrors.phone = "Phone number must be 10 digit";
+        if (!formData.physicallyChallenged) tempErrors.physicallyChallenged = "physically Challenged is required";
+        if (!formData.address) tempErrors.address = "Address is required";
+        if (!formData.govtProofs.aadhar && !formData.govtProofs.pan && !formData.govtProofs.license) {
+            tempErrors.govtProofs = "At least one government proof is required.";
+        }
+        setErrors(tempErrors);
+        return Object.keys(tempErrors).length === 0
+    }
+    
+    const handleChange = (event, id) => {
+        const { value, checked } = event.target;
+        if (tmpAnswers.hasOwnProperty(id)) {
+            if (tmpAnswers[id].includes(value)) {
+                tmpAnswers[id] = tmpAnswers[id].filter((ans) => ans !== value);
+            } else {
+                tmpAnswers[id] = [...tmpAnswers[id], value]
+            }
+        } else {
+            tmpAnswers[id] = [value];
+        }
+    }
+
+    const handleSubmit = () => {
+        let tmpErrors = {};
+
+        for (let tmp in tmpAnswers) {
+            const findQuestion = questions.find((each) => each.id === Number(tmp));
+            if (findQuestion) {
+                tmpAnswers[tmp].forEach((tmpAns) => {
+                    if (!findQuestion.answer.includes(tmpAns)) {
+                        tmpErrors[tmp] = "Wrong answer";
+                    }
+                })
+            } else {
+                throw new Error("Please answer all the questions");
+            }
+        }
+        setErrors(tmpErrors);
+        if (Object.keys(tmpErrors).length === 0) alert("All answer correcr");
+
+    }
+
+------------------------------------------------------------------------------------------------------------------------------------
+    
+ npm i @reduxjs/toolkit   
+ npm i react-redux
+ ---------------------------------------------
+ store.js
+ ---------------------------------------------
+ import { configureStore } from "@reduxjs/toolkit";
+import rootReducers from "./slice";
+
+const store = configureStore({
+    reducer:rootReducers
+})
+
+export default store;
+---------------------------------------------
+rootreducers in index.js of master slice folder
+---------------------------------------------
+import { combineSlices } from "@reduxjs/toolkit";
+import starWarReducer from "./starwarSlice";
+
+const rootReducers = combineSlices({
+    starWar: starWarReducer
+})
+
+export default rootReducers;
+---------------------------------------------
+starwarSlice.js
+---------------------------------------------
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+
+const initialState = {
+    apiData: null,
+    isRequesting: false
+}
+
+export const getVehicles = createAsyncThunk('starwarVehicle', async () => {
+    const response = await fetch("https://swapi.dev/api/vehicles/");
+    const vehicles = await response.json();
+    return vehicles;
+})
+
+const starWarSlice = createSlice({
+    initialState,
+    name: 'starWarSlice',
+    reducers: {},
+    extraReducers(builder) {
+        builder.addCase(getVehicles.pending, (state, action) => {
+            state.isRequesting = true
+        }).addCase(getVehicles.fulfilled, (state, action) => {
+            state.isRequesting = false;
+            state.apiData = action.payload
+        }).addCase(getVehicles.rejected, (state) => {
+            state.isRequesting = false
+        })
+    }
+})
+
+const starWarReducer = starWarSlice.reducer;
+
+export default starWarReducer;
+
+---------------------------------------------
+Use in component as 
+---------------------------------------------
+
+dispatch(getVehicles())
+
+
